@@ -85,6 +85,16 @@ function partial(string $path, array $data=[]): void
     require $viewPath;
 }
 
+function component(string $component, array $data=[]): void
+{
+    $componentPath = basePath("resources/components/{$component}.php");
+    if(!file_exists($componentPath)) {
+        echo "component $componentPath not found";
+        return;
+    }
+    extract($data);
+    require $componentPath;
+}
 /**
  * Dump and die - displays variable information and terminates script execution.
  * 

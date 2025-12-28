@@ -1,7 +1,7 @@
 <?php
 
 use core\Router;
-use Exception;
+
 
 require "../helper.php";
 spl_autoload_register(function ($class) {
@@ -13,6 +13,8 @@ spl_autoload_register(function ($class) {
     }
     require $classPath;
 });
+
+require "../bootstrap.php";
 
 $router = new Router();
 require basePath("/routes/webRoutes.php");
