@@ -36,3 +36,6 @@ temp/
 composer.phar
 composer.lock
 
+# Configuration files with sensitive data
+config/dbConfig.php
+
