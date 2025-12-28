@@ -13,6 +13,7 @@
             <a href="/" class="hover:text-indigo-600 transition">Home</a>
             <a href="/about" class="hover:text-indigo-600 transition">About</a>
             <a href="/contact" class="hover:text-indigo-600 transition">Contact</a>
+            <a href="/notes" class="hover:text-indigo-600 transition">Notes</a>
         </div>
 
         <div class="flex items-center gap-4">
