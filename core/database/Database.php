@@ -3,6 +3,7 @@
 namespace core\database;
 
 use core\Response;
+use JetBrains\PhpStorm\NoReturn;
 use PDO;
 
 /**
@@ -123,20 +124,18 @@ class Database
      * This is a private method used internally when database operations fail
      * or when required records are not found. It sets the HTTP response code
      * and renders an error view, then exits the script.
-     * 
-     * @param int $code HTTP status code (default: 403 Forbidden)
-     * @param string $message Optional error message to display
+     *
      * @return void Never returns (calls exit())
      */
-    private function abort($code = Response::FORBIDDEN,$message = '')
-    {
-        // Set HTTP response code
-        http_response_code($code);
+    #[NoReturn]
+    private function abort()
+    {// Set HTTP response code
+        http_response_code(Response::FORBIDDEN);
         
         // Render error view
         view('error/webError',[
-            'code' => $code,
-            'message' => $message,
+            'code' => Response::FORBIDDEN,
+            'message' => '',
         ]);
         
         // Exit script execution

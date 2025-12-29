@@ -117,3 +117,14 @@ function dd($data) {
     echo "</pre>";
     die();
 }
+function redirect(string $url, int $statusCode = 302): void
+{
+    if (headers_sent()) {
+        return;
+    }
+
+    $url = '/' . ltrim($url, '/');
+
+    header("Location: {$url}", true, $statusCode);
+    exit;
+}
