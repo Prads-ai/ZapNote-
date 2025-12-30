@@ -3,6 +3,9 @@ if(isset($router)){
     // Home
     $router->get('/','HomeController@index');
     
+    // About
+    $router->get('/about','AboutController@index');
+    
     // Authentication (Guest only - redirects if already logged in)
     $router->get('/login','AuthController@showLogin', ['GuestMiddleware']);
     $router->post('/login','AuthController@login', ['GuestMiddleware']);

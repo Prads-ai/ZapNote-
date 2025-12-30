@@ -12,7 +12,6 @@
         <div class="hidden md:flex items-center gap-10 text-sm font-semibold text-slate-500">
             <a href="/" class="hover:text-indigo-600 transition">Home</a>
             <a href="/about" class="hover:text-indigo-600 transition">About</a>
-            <a href="/contact" class="hover:text-indigo-600 transition">Contact</a>
             <?php 
             $userId = \core\Session::get('user_id');
             if($userId): ?>
