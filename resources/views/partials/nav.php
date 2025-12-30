@@ -13,15 +13,30 @@
             <a href="/" class="hover:text-indigo-600 transition">Home</a>
             <a href="/about" class="hover:text-indigo-600 transition">About</a>
             <a href="/contact" class="hover:text-indigo-600 transition">Contact</a>
-            <a href="/notes" class="hover:text-indigo-600 transition">Notes</a>
+            <?php 
+            $userId = \core\Session::get('user_id');
+            if($userId): ?>
+                <a href="/notes" class="hover:text-indigo-600 transition">Notes</a>
+            <?php endif; ?>
         </div>
 
         <div class="flex items-center gap-4">
-            <a href=""><button class="px-5 py-2.5 text-sm font-bold text-slate-700 hover:text-indigo-600 transition">Login</button></a>
-            <a href=""><button class="px-6 py-2.5 text-sm font-bold bg-slate-900 text-white rounded-full hover:bg-slate-800 shadow-xl shadow-slate-200 transition active:scale-95">
-                    Register Free
-                </button>
-            </a>
+            <?php 
+            $userId = \core\Session::get('user_id');
+            $userName = \core\Session::get('user_name', 'User');
+            ?>
+            <?php if($userId): ?>
+                <span class="text-sm font-semibold text-slate-600"><?php echo htmlspecialchars($userName); ?></span>
+                <form method="POST" action="/logout" class="inline">
+                    <button type="submit" class="px-5 py-2.5 text-sm font-bold text-slate-700 hover:text-indigo-600 transition">Logout</button>
+                </form>
+            <?php else: ?>
+                <a href="/login"><button class="px-5 py-2.5 text-sm font-bold text-slate-700 hover:text-indigo-600 transition">Login</button></a>
+                <a href="/register"><button class="px-6 py-2.5 text-sm font-bold bg-slate-900 text-white rounded-full hover:bg-slate-800 shadow-xl shadow-slate-200 transition active:scale-95">
+                        Register Free
+                    </button>
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 </nav>

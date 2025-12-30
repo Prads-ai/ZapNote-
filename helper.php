@@ -1,5 +1,6 @@
 <?php
 
+use core\Response;
 use JetBrains\PhpStorm\NoReturn;
 
 const BASE_PATH = __DIR__;
@@ -127,4 +128,34 @@ function redirect(string $url, int $statusCode = 302): void
 
     header("Location: {$url}", true, $statusCode);
     exit;
+}
+/**
+ * Authorizes an action based on a condition.
+ * 
+ * If the condition is false, aborts the request with a 403 Forbidden error.
+ * Used to protect routes and actions that require authorization.
+ * 
+ * @param bool $condition The authorization condition to check
+ * @return void Never returns if condition is false (calls abort() which exits)
+ * 
+ * @example
+ * // Check if user owns the note
+ * authorize($note['user_id'] === $currentUser);
+ * 
+ * // Check if user is admin
+ * authorize($user['role'] === 'admin');
+ */
+function authorize($condition): void
+{
+    if(!$condition){
+        abort(Response::FORBIDDEN,'You are not authorized to perform this action or to access this page');
+    }
+}
+
+#[NoReturn]
+function abort(int $code = Response::NOT_FOUND, string $message = ''): void
+{
+    http_response_code($code);
+    view('error/webError', ['message' => $message, 'code' => $code]);
+
 }

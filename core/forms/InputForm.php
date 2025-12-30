@@ -155,7 +155,7 @@ class InputForm
      * $form->error('title', 'Title must be unique');
      * $form->error('body', 'Body contains invalid characters');
      */
-    public function error($key,$value): void
+    public function error(string $key, string $value): void
     {
         $this->errors[$key] = $value;
     }

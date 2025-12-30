@@ -25,8 +25,9 @@ class Router
      * - uri: URI pattern to match
      * - controller: Controller class name (without namespace)
      * - controllerMethod: Method name to call on the controller
+     * - middleware: Optional array of middleware class names
      * 
-     * @var array<int, array{method: string, uri: string, controller: string, controllerMethod: string}>
+     * @var array<int, array{method: string, uri: string, controller: string, controllerMethod: string, middleware?: array<string>}>
      */
     protected array $routes = [];
     
@@ -39,20 +40,28 @@ class Router
      * @param string $method The HTTP method (GET, POST, DELETE, PATCH)
      * @param string $uri The URI pattern to match
      * @param string $controller The controller and method in format "Controller@method"
+     * @param array<string>|null $middleware Optional array of middleware class names
      * @return void
      */
-    public function addRoute($method, $uri, $controller): void
+    public function addRoute($method, $uri, $controller, $middleware = null): void
     {
         // Parse controller string (e.g., "HomeController@index")
         [$controller, $controllerMethod] = explode('@', $controller);
         
         // Store route information
-        $this->routes[] = [
+        $route = [
             'method' => $method,
             'uri' => $uri,
             'controller' => $controller,
             'controllerMethod' => $controllerMethod
         ];
+        
+        // Add middleware if provided
+        if ($middleware !== null) {
+            $route['middleware'] = $middleware;
+        }
+        
+        $this->routes[] = $route;
     }
     
     /**
@@ -60,11 +69,12 @@ class Router
      * 
      * @param string $uri The URI pattern
      * @param string $controller Controller and method (e.g., "HomeController@index")
+     * @param array<string>|null $middleware Optional array of middleware class names
      * @return void
      */
-    public function get(string $uri, $controller): void
+    public function get(string $uri, $controller, $middleware = null): void
     {
-        $this->addRoute('GET', $uri, $controller);
+        $this->addRoute('GET', $uri, $controller, $middleware);
     }
     
     /**
@@ -72,11 +82,12 @@ class Router
      * 
      * @param string $uri The URI pattern
      * @param string $controller Controller and method (e.g., "NoteController@store")
+     * @param array<string>|null $middleware Optional array of middleware class names
      * @return void
      */
-    public function post(string $uri, $controller): void
+    public function post(string $uri, $controller, $middleware = null): void
     {
-        $this->addRoute('POST', $uri, $controller);
+        $this->addRoute('POST', $uri, $controller, $middleware);
     }
     
     /**
@@ -84,11 +95,12 @@ class Router
      * 
      * @param string $uri The URI pattern
      * @param string $controller Controller and method (e.g., "NoteController@destroy")
+     * @param array<string>|null $middleware Optional array of middleware class names
      * @return void
      */
-    public function delete(string $uri, $controller): void
+    public function delete(string $uri, $controller, $middleware = null): void
     {
-        $this->addRoute('DELETE', $uri, $controller);
+        $this->addRoute('DELETE', $uri, $controller, $middleware);
     }
     
     /**
@@ -96,11 +108,45 @@ class Router
      * 
      * @param string $uri The URI pattern
      * @param string $controller Controller and method (e.g., "NoteController@update")
+     * @param array<string>|null $middleware Optional array of middleware class names
      * @return void
      */
-    public function patch(string $uri, $controller): void
+    public function patch(string $uri, $controller, $middleware = null): void
     {
-        $this->addRoute('PATCH', $uri, $controller);
+        $this->addRoute('PATCH', $uri, $controller, $middleware);
+    }
+
+    /**
+     * Executes middleware for a route.
+     * 
+     * Runs all middleware associated with the route before the controller is called.
+     * Middleware classes must be in the `core\middleware` namespace and implement
+     * the `Middleware` interface. If any middleware redirects or aborts, execution stops.
+     * 
+     * @param array<string> $middleware Array of middleware class names (without namespace)
+     * @return void
+     * @throws Exception If middleware class is not found
+     * 
+     * @example
+     * // Middleware is automatically run when route is matched
+     * $router->get('/notes', 'NoteController@index', ['AuthMiddleware']);
+     * // AuthMiddleware will run before NoteController@index is called
+     */
+    protected function runMiddleware(array $middleware): void
+    {
+        foreach ($middleware as $middlewareClass) {
+            // Build fully qualified middleware class name
+            $fullClassName = "core\\middleware\\" . $middlewareClass;
+            
+            // Check if middleware class exists
+            if (!class_exists($fullClassName)) {
+                throw new Exception("Middleware class not found: {$fullClassName}");
+            }
+            
+            // Instantiate and run middleware
+            $middlewareInstance = new $fullClassName();
+            $middlewareInstance->handle();
+        }
     }
 
     /**
@@ -108,14 +154,20 @@ class Router
      * 
      * This method loads the controller file, instantiates the controller class,
      * and calls the specified method. It performs validation to ensure the
-     * controller file, class, and method all exist.
+     * controller file, class, and method all exist. Runs middleware before
+     * calling the controller method.
      * 
-     * @param array{method: string, uri: string, controller: string, controllerMethod: string} $route The route array
+     * @param array{method: string, uri: string, controller: string, controllerMethod: string, middleware?: array<string>} $route The route array
      * @return void
      * @throws Exception If controller file, class, or method doesn't exist
      */
     public function callController(array $route): void
     {
+        // Run middleware first if any exists
+        if (isset($route['middleware']) && !empty($route['middleware'])) {
+            $this->runMiddleware($route['middleware']);
+        }
+        
         // Build controller file path
         $controllerFile = basePath("app/controllers/" . $route['controller'] . ".php");
         

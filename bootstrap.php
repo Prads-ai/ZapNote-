@@ -17,3 +17,10 @@ $container->bind(Database::class,function(){
 
 $container->resolve(Database::class);
 App::setContainer($container);
+
+// Register shutdown function to clear flash messages
+register_shutdown_function(function() {
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        \core\Session::clearFlash();
+    }
+});
